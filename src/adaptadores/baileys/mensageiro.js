@@ -28,6 +28,8 @@ export function criarMensageiroBaileys({ authDir, dono, logger }) {
   let sock = null;
   let tentativas = 0;
   let parado = false;
+  let aoConectar;
+  const conectado = new Promise((r) => { aoConectar = r; });
 
   async function conectar() {
     const { state, saveCreds } = await useMultiFileAuthState(authDir);
@@ -43,6 +45,7 @@ export function criarMensageiroBaileys({ authDir, dono, logger }) {
       if (connection === 'open') {
         tentativas = 0;
         logger.info('whatsapp conectado');
+        aoConectar();
       }
       if (connection === 'close') {
         const codigo = lastDisconnect?.error?.output?.statusCode;
@@ -81,6 +84,8 @@ export function criarMensageiroBaileys({ authDir, dono, logger }) {
 
   return {
     iniciar: conectar,
+    /** Resolve quando a primeira conexão abre (depois do pareamento, se houver). */
+    aguardarConexao: () => conectado,
     parar() { parado = true; sock?.end(undefined); },
     aoReceber(cb) { ouvintes.push(cb); },
     async enviar(texto) {
