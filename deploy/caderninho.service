@@ -1,0 +1,33 @@
+[Unit]
+Description=Caderninho — bot de finanças no WhatsApp
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=caderninho
+Group=caderninho
+WorkingDirectory=/opt/caderninho
+# Segredos só aqui: chmod 600, dono root
+EnvironmentFile=/etc/caderninho.env
+ExecStart=/usr/bin/node src/main.js
+Restart=always
+RestartSec=10
+# Logs vão para o journald (journalctl -u caderninho)
+StandardOutput=journal
+StandardError=journal
+
+# Endurecimento
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/caderninho
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target
