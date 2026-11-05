@@ -9,11 +9,12 @@ const paraCentavos = (valor) => Math.round(Math.abs(valor) * 100);
 
 function classificar(t, tipoConta, negativo) {
   const descricao = t.description ?? '';
-  if (FATURA.test(descricao)) return 'pagamento_fatura';
-  if (tipoConta === 'cartao') return negativo ? 'estorno' : 'compra_cartao';
   const operacao = String(t.operationType ?? '').toUpperCase();
+  // operationType é o sinal estável; a descrição só entra como reserva.
+  if (operacao === 'PAGAMENTO_FATURA' || FATURA.test(descricao)) return 'pagamento_fatura';
+  if (tipoConta === 'cartao') return operacao === 'ESTORNO' || negativo ? 'estorno' : 'compra_cartao';
   if (operacao === 'PIX' || PIX.test(descricao)) return 'pix';
-  if (['TED', 'DOC', 'TRANSFER'].includes(operacao) || TRANSFERENCIA.test(descricao)) return 'transferencia';
+  if (['TED', 'DOC', 'TRANSFER', 'TRANSFERENCIA_MESMA_INSTITUICAO'].includes(operacao) || TRANSFERENCIA.test(descricao)) return 'transferencia';
   return 'debito';
 }
 

@@ -135,3 +135,15 @@ test('o token é reutilizado entre chamadas e enviado em X-API-KEY', async () =>
 test('HTTP 429 lança ErroLimite', async () => {
   await assert.rejects(criar(fetchFalso({ status: 429 })).listarContas(), ErroLimite);
 });
+
+test('operationType tem prioridade sobre a descrição (valores informados pela IA da Pluggy, a confirmar no spike)', () => {
+  const card = { idExterno: 'c', tipo: 'cartao' };
+  const cc = { idExterno: 'cc', tipo: 'corrente' };
+  const base = { id: 'z', date: '2026-10-01T12:00:00.000Z' };
+  const fatura = mapearTransacao({ ...base, description: 'CREDITO EM CONTA', amount: -200, operationType: 'PAGAMENTO_FATURA' }, card);
+  assert.equal(fatura.tipo, 'pagamento_fatura');
+  assert.equal(fatura.direcao, 'entrada');
+  assert.equal(mapearTransacao({ ...base, description: 'ENTRE CONTAS', amount: -50, operationType: 'TRANSFERENCIA_MESMA_INSTITUICAO' }, cc).tipo, 'transferencia');
+  assert.equal(mapearTransacao({ ...base, description: 'LOJA X', amount: -20, operationType: 'ESTORNO' }, card).tipo, 'estorno');
+  assert.equal(mapearTransacao({ ...base, description: 'QUALQUER', amount: -9, operationType: 'PIX' }, cc).tipo, 'pix');
+});
