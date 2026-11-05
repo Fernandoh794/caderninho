@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { criarFontePluggy } from '../../src/adaptadores/pluggy/fonte.js';
 import { mapearTransacao } from '../../src/adaptadores/pluggy/mapear.js';
-import { ErroLimite } from '../../src/portas/fonte.js';
+import { ErroLimite, ErroAutorizacao } from '../../src/portas/fonte.js';
 import { testarContratoFonte } from '../contratos/fonte.js';
 
 // Fixtures SINTÉTICAS (ver test/fixtures/pluggy/LEIAME.md).
@@ -19,7 +19,7 @@ const corrente = contas.results[1];
 const todas = (id) => paginas[id].flatMap((p) => p.results);
 const tx = (id, nome) => todas(id).find((t) => t.id === nome);
 
-function fetchFalso({ status } = {}) {
+function fetchFalso({ status, itemExtra } = {}) {
   const chamadas = [];
   const f = async (url, init = {}) => {
     const u = new URL(url);
@@ -27,7 +27,7 @@ function fetchFalso({ status } = {}) {
     const json = (corpo, st = 200) => new Response(JSON.stringify(corpo), { status: st });
     if (u.pathname === '/auth') return json({ apiKey: 'chave-1' });
     if (status && u.pathname !== '/auth') return json({}, status);
-    if (u.pathname === '/items/item-bb') return json(item);
+    if (u.pathname === '/items/item-bb') return json({ ...item, ...itemExtra });
     if (u.pathname === '/accounts') return json(contas);
     if (u.pathname === '/transactions') {
       const lista = paginas[u.searchParams.get('accountId')];
@@ -146,4 +146,28 @@ test('operationType tem prioridade sobre a descrição (valores informados pela 
   assert.equal(mapearTransacao({ ...base, description: 'ENTRE CONTAS', amount: -50, operationType: 'TRANSFERENCIA_MESMA_INSTITUICAO' }, cc).tipo, 'transferencia');
   assert.equal(mapearTransacao({ ...base, description: 'LOJA X', amount: -20, operationType: 'ESTORNO' }, card).tipo, 'estorno');
   assert.equal(mapearTransacao({ ...base, description: 'QUALQUER', amount: -9, operationType: 'PIX' }, cc).tipo, 'pix');
+});
+
+test('as contas ficam em cache: segunda listagem não chama a API de novo', async () => {
+  const f = fetchFalso();
+  const fonte = criar(f);
+  await fonte.listarContas();
+  const antes = f.chamadas.length;
+  await fonte.listarContas();
+  await fonte.listarMovimentacoes('conta-cartao-bb', '1900-01-01');
+  const novas = f.chamadas.slice(antes).filter((c) => c.url.pathname !== '/transactions');
+  assert.deepEqual(novas, []);
+});
+
+test('item em LOGIN_ERROR lança ErroAutorizacao', async () => {
+  await assert.rejects(criar(fetchFalso({ itemExtra: { status: 'LOGIN_ERROR' } })).listarContas(), ErroAutorizacao);
+});
+
+test('consentimento vencido lança ErroAutorizacao, mesmo com contas em cache', async () => {
+  let agora = Date.parse('2026-11-01T00:00:00Z');
+  const f = fetchFalso({ itemExtra: { consentExpiresAt: '2026-11-10T00:00:00.000Z' } });
+  const fonte = criarFontePluggy({ clientId: 'id', clientSecret: 's', itemIds: ['item-bb'], fetch: f, agora: () => agora });
+  await fonte.listarContas();
+  agora = Date.parse('2026-11-11T00:00:00Z');
+  await assert.rejects(fonte.listarMovimentacoes('conta-cartao-bb', '1900-01-01'), ErroAutorizacao);
 });
