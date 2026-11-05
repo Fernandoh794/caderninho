@@ -1,0 +1,24 @@
+{
+  "_sintetico": true,
+  "total": 2,
+  "totalPages": 1,
+  "page": 1,
+  "results": [
+    {
+      "id": "conta-cartao-bb",
+      "type": "CREDIT",
+      "subtype": "CREDIT_CARD",
+      "name": "Ourocard Visa",
+      "marketingName": "Ourocard",
+      "number": "1234",
+      "creditData": { "balanceCloseDate": "2026-10-15", "balanceDueDate": "2026-10-25" }
+    },
+    {
+      "id": "conta-corrente-bb",
+      "type": "BANK",
+      "subtype": "CHECKING_ACCOUNT",
+      "name": "Conta Corrente",
+      "number": "00012345-6"
+    }
+  ]
+}
