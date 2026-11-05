@@ -70,3 +70,11 @@ test('comando desconhecido responde com a lista', () => {
   const { run } = montar();
   assert.match(run('xyz'), /!pendentes.*!fatura.*!gastos.*!contas/s);
 });
+
+test('!cartao recalcula a fatura das compras já gravadas', () => {
+  const { repo, run } = montar();
+  const semDia = repo.upsertConta({ idExterno: 'mp', tipo: 'cartao', banco: 'mp', apelido: 'MP' });
+  const id = repo.inserirMovimentacao({ idExterno: 'x', direcao: 'saida', tipo: 'compra_cartao', descricao: 'Loja', valorCentavos: 100, data: '2026-10-20' }, { contaId: semDia, status: 'pendente', faturaRef: null });
+  run('cartao', 'MP', '15', '25');
+  assert.equal(repo.obterMovimentacao(id).faturaRef, '2026-11');
+});

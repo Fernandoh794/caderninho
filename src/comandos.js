@@ -93,7 +93,11 @@ function cartao({ repo }, [apelido, fechamento, vencimento]) {
   const v = Number(vencimento);
   if (!c) return `Não achei a conta "${apelido}". Contas: ${repo.listarContas().map((x) => x.apelido).join(', ')}.`;
   if (![f, v].every((n) => Number.isInteger(n) && n >= 1 && n <= 31)) return 'Formato: !cartao <apelido> <dia fechamento> <dia vencimento>';
-  repo.db.prepare("update contas set tipo = 'cartao', dia_fechamento = ?, dia_vencimento = ? where id = ?").run(f, v, c.id);
+  repo.transacao(() => {
+    repo.db.prepare("update contas set tipo = 'cartao', dia_fechamento = ?, dia_vencimento = ? where id = ?").run(f, v, c.id);
+    const atualizar = repo.db.prepare('update movimentacoes set fatura_ref = ? where id = ?');
+    for (const m of repo.listarMovimentacoes({ contaId: c.id })) atualizar.run(faturaRefDe(m.data, f), m.id);
+  });
   return `${c.apelido}: fecha dia ${f}, vence dia ${v}.`;
 }
 

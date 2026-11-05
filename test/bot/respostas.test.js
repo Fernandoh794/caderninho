@@ -116,3 +116,19 @@ test('parcela 1 classificada abre grupo de parcelas', async () => {
   assert.equal(g[0].ultimaParcela, 1);
   assert.equal(repo.obterMovimentacao(a).grupoParcelasId, g[0].id);
 });
+
+test('"sim" citando outra pergunta não confirma o Confirma? pendente de outra movimentação', async () => {
+  const { bot, mov, responder, idDaPergunta, repo, mae } = montarBot();
+  const antiga = mov({ descricao: 'Netflix', data: '2026-10-01' });
+  repo.gravarAtribuicoes(antiga, [{ pessoaId: mae, bp: 10000 }]);
+  repo.definirCategoria(antiga, 'assinaturas');
+  repo.marcarClassificada(antiga);
+  repo.salvarMemoria('netflix', 'assinaturas');
+  const a = mov({ descricao: 'Netflix' });
+  const b = mov({ descricao: 'Padaria' });
+  await bot.perguntarPendentes();
+  await responder('mãe mercado'); // sem citação: vai para b e pede Confirma?
+  await responder('sim', idDaPergunta(a)); // aceita a sugestão de a, não confirma b
+  assert.equal(repo.obterMovimentacao(b).status, 'pendente');
+  assert.equal(repo.obterMovimentacao(a).status, 'classificada');
+});

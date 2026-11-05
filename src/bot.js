@@ -152,8 +152,9 @@ export function criarBot({ repo, mensageiro, transcritor, interpretador, agora, 
       return;
     }
 
-    // Resposta a um "Confirma?" pendente
-    if (aguardando && r.tipo === 'confirmacao') {
+    // Resposta a um "Confirma?" pendente — só quando não cita outra pergunta
+    const citada = msg.respondeAId ? repo.perguntaPorMensagem(msg.respondeAId) : null;
+    if (aguardando && r.tipo === 'confirmacao' && (citada == null || citada === aguardando.movId)) {
       const { movId, resultado } = aguardando;
       aguardando = null;
       const mov = repo.obterMovimentacao(movId);
