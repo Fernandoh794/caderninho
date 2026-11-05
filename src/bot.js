@@ -107,9 +107,11 @@ export function criarBot({ repo, mensageiro, transcritor, interpretador, agora, 
       if (plano.completa) {
         repo.marcarClassificada(mov.id);
         repo.fecharPergunta(mov.id);
-        if (mov.parcelaAtual === 1 && mov.totalParcelas > 1 && mov.valorTotalCentavos && !mov.grupoParcelasId) {
+        if (mov.parcelaAtual === 1 && mov.totalParcelas > 1 && !mov.grupoParcelasId) {
+          // Sem valor total (Open Finance), estima pela parcela; ver acharGrupoParcelas.
+          const valorTotalCentavos = mov.valorTotalCentavos ?? mov.valorCentavos * mov.totalParcelas;
           const g = repo.abrirGrupo({ contaId: mov.contaId, estabelecimentoNorm: mov.estabelecimentoNorm,
-            valorTotalCentavos: mov.valorTotalCentavos, totalParcelas: mov.totalParcelas });
+            valorTotalCentavos, totalParcelas: mov.totalParcelas });
           repo.vincularGrupo(mov.id, g);
         }
       }

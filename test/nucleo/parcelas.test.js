@@ -24,3 +24,19 @@ test('estabelecimento diferente ou total de parcelas diferente não casa', () =>
   assert.equal(acharGrupoParcelas(mov({ parcelaAtual: 2, estabelecimentoNorm: 'outra' }), [grupo]), null);
   assert.equal(acharGrupoParcelas(mov({ parcelaAtual: 2, totalParcelas: 10 }), [grupo]), null);
 });
+
+// Open Finance costuma não informar o valor total: o grupo vale pelo valor da parcela.
+const semTotal = (extra) => ({ estabelecimentoNorm: 'loja x', totalParcelas: 6, valorCentavos: 10000, ...extra });
+
+test('sem valor total, casa pelo valor da parcela', () => {
+  assert.equal(acharGrupoParcelas(semTotal({ parcelaAtual: 2 }), [grupo]), 7);
+});
+test('sem valor total, tolera diferença de centavos de arredondamento', () => {
+  assert.equal(acharGrupoParcelas(semTotal({ parcelaAtual: 2, valorCentavos: 10001 }), [grupo]), 7);
+});
+test('sem valor total, parcela de outro valor não casa', () => {
+  assert.equal(acharGrupoParcelas(semTotal({ parcelaAtual: 2, valorCentavos: 5000 }), [grupo]), null);
+});
+test('sem valor total e sem valor da parcela não há como casar', () => {
+  assert.equal(acharGrupoParcelas({ estabelecimentoNorm: 'loja x', totalParcelas: 6, parcelaAtual: 2 }, [grupo]), null);
+});

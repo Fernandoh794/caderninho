@@ -117,6 +117,16 @@ test('parcela 1 classificada abre grupo de parcelas', async () => {
   assert.equal(repo.obterMovimentacao(a).grupoParcelasId, g[0].id);
 });
 
+test('parcela 1 sem valor total (Open Finance) abre grupo com total estimado pela parcela', async () => {
+  const { bot, mov, responder, idDaPergunta, repo } = montarBot();
+  const a = mov({ descricao: 'Loja X 01/06', parcelaAtual: 1, totalParcelas: 6, valorCentavos: 10000 });
+  await bot.perguntarPendentes();
+  await responder('mãe compras', idDaPergunta(a));
+  const g = repo.gruposParcelas();
+  assert.equal(g.length, 1);
+  assert.equal(g[0].valorTotalCentavos, 60000);
+});
+
 test('"sim" citando outra pergunta não confirma o Confirma? pendente de outra movimentação', async () => {
   const { bot, mov, responder, idDaPergunta, repo, mae } = montarBot();
   const antiga = mov({ descricao: 'Netflix', data: '2026-10-01' });
