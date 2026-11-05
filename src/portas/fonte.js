@@ -2,6 +2,14 @@
  * Porta FonteDeMovimentacoes: de onde vêm contas e movimentações.
  * A normalização (sinal, parcelas) é responsabilidade do adaptador.
  *
+ * Contrato (executável em test/contratos/fonte.js; todo adaptador novo deve passar nele):
+ * - valorCentavos inteiro e positivo; a direção carrega o sinal; data AAAA-MM-DD;
+ *   idExterno único; listarMovimentacoes só devolve data >= desde.
+ * - Falhas tipadas: excesso de chamadas lança ErroLimite; consentimento vencido ou
+ *   revogado lança ErroAutorizacao. O monitor de saúde e o sync dependem desses tipos.
+ * - Parcelas: parcelaAtual e totalParcelas quando a origem informa; valorTotalCentavos
+ *   é opcional (o Open Finance costuma omitir) e o núcleo não pode exigi-lo.
+ *
  * @typedef {{idExterno: string, tipo: 'cartao'|'corrente', banco: string, apelido: string,
  *   diaFechamento?: number, diaVencimento?: number}} ContaExterna
  *

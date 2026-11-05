@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { ErroLimite, ErroAutorizacao } from '../../src/portas/fonte.js';
 
 /**
  * Contrato de FonteDeMovimentacoes. `criar` devolve uma fonte cujas
@@ -37,5 +38,22 @@ export function testarContratoFonte(nome, criar) {
         assert.ok(m.data >= corte, `desde não filtrou: ${m.data} < ${corte}`);
       }
     }
+  });
+}
+
+/**
+ * Contrato de erros: quem trata falhas (monitor de saúde, sync) depende de a fonte
+ * lançar estes tipos, e não erros genéricos. `criar(falha)` devolve uma fonte que
+ * encontra a falha pedida: 'limite' (a origem recusa por excesso de chamadas) ou
+ * 'autorizacao' (consentimento vencido ou revogado).
+ */
+export function testarContratoErrosDaFonte(nome, criar) {
+  test(`${nome}: limite de chamadas vira ErroLimite`, async () => {
+    const fonte = await criar('limite');
+    await assert.rejects(fonte.listarContas(), ErroLimite);
+  });
+  test(`${nome}: autorização vencida vira ErroAutorizacao`, async () => {
+    const fonte = await criar('autorizacao');
+    await assert.rejects(fonte.listarContas(), ErroAutorizacao);
   });
 }

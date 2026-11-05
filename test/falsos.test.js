@@ -1,17 +1,19 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { testarContratoFonte } from './contratos/fonte.js';
+import { testarContratoFonte, testarContratoErrosDaFonte } from './contratos/fonte.js';
 import { testarContratoMensageiro } from './contratos/mensageiro.js';
 import { criarFonteFalsa } from '../src/falsos/fonte.js';
 import { criarMensageiroFalso } from '../src/falsos/mensageiro.js';
 import { criarTranscritorFalso } from '../src/falsos/transcritor.js';
 import { criarInterpretadorFalso } from '../src/falsos/interpretador.js';
-import { ErroLimite } from '../src/portas/fonte.js';
+import { ErroLimite, ErroAutorizacao } from '../src/portas/fonte.js';
 
 const conta = { idExterno: 'c1', tipo: 'cartao', banco: 'bb', apelido: 'BB' };
 const mov = (id, data) => ({ idExterno: id, contaExternaId: 'c1', direcao: 'saida', tipo: 'compra_cartao', descricao: 'X', valorCentavos: 100, data });
 
 testarContratoFonte('fonte falsa', () => criarFonteFalsa({ contas: [conta], movimentacoes: [mov('a', '2026-10-01'), mov('b', '2026-11-01')] }));
+testarContratoErrosDaFonte('fonte falsa', (falha) =>
+  criarFonteFalsa({ contas: [conta], erro: falha === 'limite' ? new ErroLimite() : new ErroAutorizacao() }));
 
 testarContratoMensageiro('mensageiro falso', () => {
   const mensageiro = criarMensageiroFalso();

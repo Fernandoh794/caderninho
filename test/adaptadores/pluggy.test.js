@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 import { criarFontePluggy } from '../../src/adaptadores/pluggy/fonte.js';
 import { mapearTransacao } from '../../src/adaptadores/pluggy/mapear.js';
 import { ErroLimite, ErroAutorizacao } from '../../src/portas/fonte.js';
-import { testarContratoFonte } from '../contratos/fonte.js';
+import { testarContratoFonte, testarContratoErrosDaFonte } from '../contratos/fonte.js';
 
 // Fixtures SINTÉTICAS (ver test/fixtures/pluggy/LEIAME.md).
 const lerJson = (nome) => JSON.parse(readFileSync(new URL(`../fixtures/pluggy/${nome}`, import.meta.url)));
@@ -43,6 +43,8 @@ const criar = (fetch = fetchFalso()) =>
   criarFontePluggy({ clientId: 'id', clientSecret: 'segredo', itemIds: ['item-bb'], fetch });
 
 testarContratoFonte('pluggy (fetch falso)', () => criar());
+testarContratoErrosDaFonte('pluggy (fetch falso)', (falha) =>
+  criar(falha === 'limite' ? fetchFalso({ status: 429 }) : fetchFalso({ itemExtra: { status: 'LOGIN_ERROR' } })));
 
 test('compra de cartão (positiva) vira saída/compra_cartao', () => {
   const m = mapearTransacao(tx('conta-cartao-bb', 't-cartao-1'), { idExterno: 'conta-cartao-bb', tipo: 'cartao' });
