@@ -1,0 +1,22 @@
+{
+  "_sintetico": true,
+  "paginas": [
+    {
+      "total": 5, "totalPages": 2, "page": 1,
+      "results": [
+        { "id": "t-cartao-1", "description": "SUPERMERCADO EXEMPLO", "amount": 123.45, "date": "2026-10-03T00:00:00.000Z", "type": "DEBIT", "creditCardMetadata": null },
+        { "id": "t-cartao-2", "description": "LOJA ELETRO", "amount": 100.00, "date": "2026-10-05T00:00:00.000Z", "type": "DEBIT",
+          "creditCardMetadata": { "installmentNumber": 2, "totalInstallments": 6, "totalAmount": 600.00, "purchaseDate": "2026-09-05T00:00:00.000Z" } },
+        { "id": "t-cartao-3", "description": "ESTORNO LOJA ELETRO", "amount": -35.90, "date": "2026-10-07T00:00:00.000Z", "type": "CREDIT", "creditCardMetadata": null }
+      ]
+    },
+    {
+      "total": 5, "totalPages": 2, "page": 2,
+      "results": [
+        { "id": "t-cartao-4", "description": "PAGAMENTO FATURA", "amount": -500.00, "date": "2026-10-10T00:00:00.000Z", "type": "CREDIT", "creditCardMetadata": null },
+        { "id": "t-cartao-5", "description": "STREAMING EXEMPLO", "amount": 55.90, "date": "2026-10-12T00:00:00.000Z", "type": "DEBIT",
+          "creditCardMetadata": { "installmentNumber": 1, "totalInstallments": 1, "totalAmount": 55.90 } }
+      ]
+    }
+  ]
+}

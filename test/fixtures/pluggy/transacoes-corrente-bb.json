@@ -1,0 +1,14 @@
+{
+  "_sintetico": true,
+  "paginas": [
+    {
+      "total": 4, "totalPages": 1, "page": 1,
+      "results": [
+        { "id": "t-cc-1", "description": "Pix enviado FULANO DE TAL", "amount": -80.00, "date": "2026-10-04T12:00:00.000Z", "type": "DEBIT", "operationType": "PIX" },
+        { "id": "t-cc-2", "description": "Pix recebido BELTRANA", "amount": 150.00, "date": "2026-10-06T12:00:00.000Z", "type": "CREDIT", "operationType": "PIX" },
+        { "id": "t-cc-3", "description": "COMPRA DEBITO PADARIA", "amount": -12.50, "date": "2026-10-08T12:00:00.000Z", "type": "DEBIT", "operationType": null },
+        { "id": "t-cc-4", "description": "SALARIO EMPRESA", "amount": 3000.00, "date": "2026-10-09T12:00:00.000Z", "type": "CREDIT", "operationType": "TED" }
+      ]
+    }
+  ]
+}
